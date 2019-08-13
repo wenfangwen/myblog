@@ -94,18 +94,17 @@
   };
 </script>
 
-  <meta name="description" content="通常我们需要一个reducer和一个action，然后使用connect来包裹你的Component。假设你已经有一个key为main的reducer和一个action.js. 我们的class组件一般都这么写： 123456789101112131415161718192021import React from &apos;react&apos;import &amp;#123;render&amp;#125; from &apos;rea">
-<meta name="keywords" content="react,react-redux">
+  <meta name="description" content="问题由来1、最近用vue做前端项目，从查询页面进入详情页时，返回页面需要保留上次的查询条件，表格当前页数。2、从其他菜单进去，不需要缓存，要保持页面的初始状态。基于上面两种情况，我打算用vue中的keep-alive来缓存页面。 问题的解决方法 列表项目  . 用vue的内置组件keep-alive来缓存列表页面，再路由出口渲染组件时配置： 1`&amp;lt;keep-alive&amp;gt;``  ``&amp;l">
 <meta property="og:type" content="article">
-<meta property="og:title" content="react-redux的@connect修饰器的简单方法">
-<meta property="og:url" content="http://yoursite.com/2019/07/27/react-redux的@connect修饰器方法/index.html">
+<meta property="og:title" content="Wandly">
+<meta property="og:url" content="http://yoursite.com/2019/08/05/vue项目keep-alive缓存-从详情页返回列表时保存上一步的信息/index.html">
 <meta property="og:site_name" content="Wandly">
-<meta property="og:description" content="通常我们需要一个reducer和一个action，然后使用connect来包裹你的Component。假设你已经有一个key为main的reducer和一个action.js. 我们的class组件一般都这么写： 123456789101112131415161718192021import React from &apos;react&apos;import &amp;#123;render&amp;#125; from &apos;rea">
+<meta property="og:description" content="问题由来1、最近用vue做前端项目，从查询页面进入详情页时，返回页面需要保留上次的查询条件，表格当前页数。2、从其他菜单进去，不需要缓存，要保持页面的初始状态。基于上面两种情况，我打算用vue中的keep-alive来缓存页面。 问题的解决方法 列表项目  . 用vue的内置组件keep-alive来缓存列表页面，再路由出口渲染组件时配置： 1`&amp;lt;keep-alive&amp;gt;``  ``&amp;l">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-27T07:20:00.403Z">
+<meta property="og:updated_time" content="2019-08-05T07:54:13.741Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="react-redux的@connect修饰器的简单方法">
-<meta name="twitter:description" content="通常我们需要一个reducer和一个action，然后使用connect来包裹你的Component。假设你已经有一个key为main的reducer和一个action.js. 我们的class组件一般都这么写： 123456789101112131415161718192021import React from &apos;react&apos;import &amp;#123;render&amp;#125; from &apos;rea">
+<meta name="twitter:title" content="Wandly">
+<meta name="twitter:description" content="问题由来1、最近用vue做前端项目，从查询页面进入详情页时，返回页面需要保留上次的查询条件，表格当前页数。2、从其他菜单进去，不需要缓存，要保持页面的初始状态。基于上面两种情况，我打算用vue中的keep-alive来缓存页面。 问题的解决方法 列表项目  . 用vue的内置组件keep-alive来缓存列表页面，再路由出口渲染组件时配置： 1`&amp;lt;keep-alive&amp;gt;``  ``&amp;l">
 
 
 
@@ -113,7 +112,7 @@
 
   
   
-  <link rel="canonical" href="http://yoursite.com/2019/07/27/react-redux的@connect修饰器方法/">
+  <link rel="canonical" href="http://yoursite.com/2019/08/05/vue项目keep-alive缓存-从详情页返回列表时保存上一步的信息/">
 
 
 
@@ -124,7 +123,7 @@
 </script>
 
   
-  <title>react-redux的@connect修饰器的简单方法 | Wandly</title>
+  <title> | Wandly</title>
   
 
 
@@ -303,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/react-redux的@connect修饰器方法/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/05/vue项目keep-alive缓存-从详情页返回列表时保存上一步的信息/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wandly">
@@ -320,7 +319,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">react-redux的@connect修饰器的简单方法
+          <h1 class="post-title" itemprop="name headline">
 
               
             
@@ -346,7 +345,7 @@
                 
               
 
-              <time title="创建时间：2019-07-27 15:07:48" itemprop="dateCreated datePublished" datetime="2019-07-27T15:07:48+08:00">2019-07-27</time>
+              <time title="创建时间：2019-08-05 15:41:14" itemprop="dateCreated datePublished" datetime="2019-08-05T15:41:14+08:00">2019-08-05</time>
             </span>
           
 
@@ -386,21 +385,27 @@
       
 
       
-        <p>通常我们需要一个reducer和一个action，然后使用connect来包裹你的Component。假设你已经有一个key为main的reducer和一个action.js. 我们的class组件一般都这么写：</p>
-<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> &#123;render&#125; <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> &#123;connect&#125; <span class="keyword">from</span> <span class="string">'react-redux'</span></span><br><span class="line"><span class="keyword">import</span> &#123;bindActionCreators&#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="keyword">import</span> action <span class="keyword">from</span> <span class="string">'action.js'</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyComponent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span></span>&#123;</span><br><span class="line">  render()&#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;div&gt;hello&lt;/div&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">mapStateToProps</span>(<span class="params">state</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> state.main</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">mapDispatchToProps</span>(<span class="params">dispatch</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> bindActionCreators(action,dispatch)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(mapStateToProps,mapDispatchToProps)(MyComponent)</span><br></pre></td></tr></table></figure>
+        <h2 id="问题由来"><a href="#问题由来" class="headerlink" title="问题由来"></a>问题由来</h2><p>1、最近用vue做前端项目，从查询页面进入详情页时，返回页面需要保留上次的查询条件，表格当前页数。<br>2、从其他菜单进去，不需要缓存，要保持页面的初始状态。<br>基于上面两种情况，我打算用vue中的keep-alive来缓存页面。</p>
+<h2 id="问题的解决方法"><a href="#问题的解决方法" class="headerlink" title="问题的解决方法"></a>问题的解决方法</h2><ul>
+<li>列表项目</li>
+</ul>
+<p>. 用vue的内置组件keep-alive来缓存列表页面，再路由出口渲染组件时配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`&lt;keep-alive&gt;``  ``&lt;router-view v-``if``=``&quot;$route.meta.keepAlive&quot;``&gt;&lt;/router-view&gt;``&lt;/keep-alive&gt;``&lt;router-view v-``if``=``&quot;!$route.meta.keepAlive&quot;``&gt;&lt;/router-view&gt;`</span><br></pre></td></tr></table></figure>
 
-<p>上面代码是connet的基本用法，下面我们用@connect装饰器来重写上面的代码</p>
-<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> &#123;render&#125; <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> &#123;connect&#125; <span class="keyword">from</span> <span class="string">'react-redux'</span></span><br><span class="line"><span class="keyword">import</span> &#123;bindActionCreators&#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="keyword">import</span> action <span class="keyword">from</span> <span class="string">'action.js'</span></span><br><span class="line"> </span><br><span class="line">@connect(</span><br><span class="line"> state=&gt;state.main,</span><br><span class="line"> dispatch=&gt;bindActionCreators(action,dispatch)</span><br><span class="line">)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyComponent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span></span>&#123;</span><br><span class="line">  render()&#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;div&gt;hello&lt;/div&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在路由选项中，配置meta属性，keepAlive为true即为需要缓存，同时设置isBack属性，用来标识页面是否是从详情页面返回的。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`&#123;``  ``name:``&apos;borrow&apos;``,``  ``path:``&apos;/borrow&apos;``,``  ``component:borrow,``  ``meta: &#123;``    ``keepAlive:``true``,``    ``isBack: ``true``,``  ``&#125;,``&#125;`</span><br></pre></td></tr></table></figure>
 
-<p>重写完了，看起来舒服很多。在我们实际项目中，可能是一个模块下面又有很多个小组件，它们都共用同样的action和reducer，我们在每个组件中都这么写，是不是有点太麻烦了？冗余代码太多了。</p>
-<p>其实是可以把connect抽取出来的，比如写一个connect.js:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;connect&#125; <span class="keyword">from</span> <span class="string">'react-redux'</span></span><br><span class="line"><span class="keyword">import</span> &#123;bindActionCreators&#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="keyword">import</span> action <span class="keyword">from</span> <span class="string">'action.js'</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> connect(</span><br><span class="line"> state=&gt;state.main,</span><br><span class="line"> dispatch=&gt;bindActionCreators(action,dispatch)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>通过beforeRouteEnter(to,from,next)，来判断路由是从哪里跳转的，如果是从详情页跳转的，将当前路由对象的meta.isBace设置为true，否则设置为false。（设置在查询页面）</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`beforeRouteEnter(to, from, next) &#123;``  ``if` `(from.path == ``&quot;/addborrow&quot;``) &#123;``      ``to.meta.isBack = ``true``;``    ``&#125; ``else` `&#123;``      ``to.meta.isBack = ``false``;``    ``&#125;``    ``next();``&#125;,`</span><br></pre></td></tr></table></figure>
 
-<p>然后在需要用到的组件中这么用：</p>
-<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> &#123;render&#125; <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> connect <span class="keyword">from</span> <span class="string">'connect.js'</span></span><br><span class="line"></span><br><span class="line">@connect</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">MyComponent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span></span>&#123;</span><br><span class="line">  render()&#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;div&gt;hello&lt;/div&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样就ok了，和最开始的用法比起来，是不是明显好用又方便？</p>
-
+<ul>
+<li>为了在其他页面进入时，更新页面中的列表数据，我们将在activated钩子函数中挂载页面初次进入时的请求数据：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`activated() &#123;``  ``if` `(!``this``.$route.meta.isBack) &#123;``    ``this``.handleClear(``&apos;queryForm&apos;``);``/*清空查询条件*/``  ``&#125;``else``&#123;``    ``this``.$route.meta.isBack = ``false``;``    ``this``.getBorrowList();``/*列表重新加载*/``  ``&#125;``&#125;,`</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -425,17 +430,6 @@
 
     <footer class="post-footer">
       
-        
-          
-        
-        <div class="post-tags">
-          
-            <a href="/tags/react/" rel="tag"># react</a>
-          
-            <a href="/tags/react-redux/" rel="tag"># react-redux</a>
-          
-        </div>
-      
 
       
       
@@ -445,8 +439,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/27/利用redux-persist插件轻松几步让Redux实现数据持久化/" rel="next" title="利用redux-persist插件轻松几步让Redux实现数据持久化">
-                <i class="fa fa-chevron-left"></i> 利用redux-persist插件轻松几步让Redux实现数据持久化
+              <a href="/2019/07/27/react-redux的@connect修饰器方法/" rel="next" title="react-redux的@connect修饰器的简单方法">
+                <i class="fa fa-chevron-left"></i> react-redux的@connect修饰器的简单方法
               </a>
             
           </div>
@@ -454,10 +448,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/08/05/vue项目keep-alive缓存-从详情页返回列表时保存上一步的信息/" rel="prev" title>
-                 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -501,8 +491,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
 
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -603,6 +602,23 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题由来"><span class="nav-number">1.</span> <span class="nav-text">问题由来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题的解决方法"><span class="nav-number">2.</span> <span class="nav-text">问题的解决方法</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
