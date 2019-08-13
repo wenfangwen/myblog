@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"always","offset":12,"onmobile":false},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="浅复制和深复制都可在已有对象的基础上再生一份，但对象的实例存储在堆内存中然后通过一个引用值去操作对象，由此复制的时候就存在两种情况了：复制引用和复制实例，这也是浅复制和深复制的区别所在。  浅复制：浅复制是复制引用，复制后的引用都是指向同一个对象的实例，彼此之间的操作会互相影响。 深复制：深复制不是简单的复制引用，而是在堆中重新分配内存，并且把源对象实例的所有属性都进行新建复制，以保证深复制的对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JS浅拷贝与深拷贝的简单分析">
+<meta property="og:url" content="http://yoursite.com/2017/05/14/浅拷贝与深拷贝/index.html">
+<meta property="og:site_name" content="Wandly">
+<meta property="og:description" content="浅复制和深复制都可在已有对象的基础上再生一份，但对象的实例存储在堆内存中然后通过一个引用值去操作对象，由此复制的时候就存在两种情况了：复制引用和复制实例，这也是浅复制和深复制的区别所在。  浅复制：浅复制是复制引用，复制后的引用都是指向同一个对象的实例，彼此之间的操作会互相影响。 深复制：深复制不是简单的复制引用，而是在堆中重新分配内存，并且把源对象实例的所有属性都进行新建复制，以保证深复制的对象">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-26T06:32:22.522Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JS浅拷贝与深拷贝的简单分析">
+<meta name="twitter:description" content="浅复制和深复制都可在已有对象的基础上再生一份，但对象的实例存储在堆内存中然后通过一个引用值去操作对象，由此复制的时候就存在两种情况了：复制引用和复制实例，这也是浅复制和深复制的区别所在。  浅复制：浅复制是复制引用，复制后的引用都是指向同一个对象的实例，彼此之间的操作会互相影响。 深复制：深复制不是简单的复制引用，而是在堆中重新分配内存，并且把源对象实例的所有属性都进行新建复制，以保证深复制的对象">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2017/05/14/浅拷贝与深拷贝/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  
+  <title>JS浅拷贝与深拷贝的简单分析 | Wandly</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Wandly</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">专注于前端开发,分享前端开发经验和前端资讯</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/14/浅拷贝与深拷贝/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wandly">
+      <meta itemprop="description" content="只要熟悉菜谱，任何人都可能做出美味佳肴，我是一名前端攻城师，也是一名厨子">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wandly">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JS浅拷贝与深拷贝的简单分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-05-14 14:21:59" itemprop="dateCreated datePublished" datetime="2017-05-14T14:21:59+08:00">2017-05-14</time>
+            </span>
+          
+
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>浅复制和深复制都可在已有对象的基础上再生一份，但对象的实例存储在堆内存中然后通过一个引用值去操作对象，由此复制的时候就存在两种情况了：复制引用和复制实例，这也是浅复制和深复制的区别所在。</p>
+<ul>
+<li>浅复制：浅复制是复制引用，复制后的引用都是指向同一个对象的实例，彼此之间的操作会互相影响。</li>
+<li>深复制：深复制不是简单的复制引用，而是在堆中重新分配内存，并且把源对象实例的所有属性都进行新建复制，以保证深复制的对象的引用不包含任何原有对象或对象上的任何对象，复制后的对象与原来的对象是完全隔离的。</li>
+</ul>
+<h3 id="浅复制："><a href="#浅复制：" class="headerlink" title="浅复制："></a>浅复制：</h3><p>浅复制就是简单的引用复制，示例如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> src = &#123;</span><br><span class="line">       name:<span class="string">"src"</span>;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="keyword">var</span> target = src; <span class="comment">//复制一份src对象的引用</span></span><br><span class="line">target.name = <span class="string">"target"</span>; <span class="comment">//改变复制后对象的name值</span></span><br><span class="line"><span class="built_in">console</span>.log(src.name);   <span class="comment">//输出target，即原对象也发生了改变，证明复制的是指向堆内存内对象位置的引用</span></span><br></pre></td></tr></table></figure>
+
+<p>Array 的 slice()和 concat()方法都会返回一个新的数组实例，这与直接引用复制不同，但数组中的对象元素（Object、Array 等）仍只是复制了引用，并不是真正的深复制。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> array = [<span class="number">1</span>, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], &#123; <span class="attr">name</span>: <span class="string">'array'</span> &#125;];</span><br><span class="line"><span class="keyword">var</span> array_concat = array.concat(); <span class="comment">//copy array返回新数组</span></span><br><span class="line"><span class="keyword">var</span> array_slice = array.slice(<span class="number">0</span>); <span class="comment">//copy array返回新数组</span></span><br><span class="line">array_concat[<span class="number">0</span>] = <span class="number">3</span>; <span class="comment">//改变基本类型值不会相互影响</span></span><br><span class="line">array_concat[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">5</span>; <span class="comment">//改变array_concat中数组元素的值</span></span><br><span class="line">array_slice[<span class="number">0</span>] = <span class="number">4</span>; <span class="comment">//改变基本类型值不会相互影响</span></span><br><span class="line">array_slice[<span class="number">2</span>].name = <span class="string">'array_slice'</span>; <span class="comment">//改变引用类型值会相互影响</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(array[<span class="number">1</span>]); <span class="comment">//[5,2,3]//改变引用类型值会相互影响</span></span><br><span class="line"><span class="built_in">console</span>.log(array_slice[<span class="number">1</span>]); <span class="comment">//[5,2,3]//改变引用类型值会相互影响</span></span><br><span class="line"><span class="built_in">console</span>.log(array[<span class="number">2</span>].name); <span class="comment">//array_slice</span></span><br><span class="line"><span class="built_in">console</span>.log(array_concat[<span class="number">2</span>].name); <span class="comment">//array_slice</span></span><br><span class="line"><span class="built_in">console</span>.log(array); <span class="comment">//[ 1, [ 5, 2, 3 ], &#123; name: 'array_slice' &#125; ]</span></span><br><span class="line"><span class="built_in">console</span>.log(array_concat); <span class="comment">//[ 3, [ 5, 2, 3 ], &#123; name: 'array_slice' &#125; ]</span></span><br><span class="line"><span class="built_in">console</span>.log(array_slice); <span class="comment">//[ 4, [ 5, 2, 3 ], &#123; name: 'array_slice' &#125; ]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="深复制："><a href="#深复制：" class="headerlink" title="深复制："></a>深复制：</h3><p>由深复制的定义来看，深复制要求如果源对象存在对象属性，那么需要进行递归复制，从而保证复制的对象与源对象完全隔离。然而还有一种处在浅复制和深复制范围之间的复制——jQuery 的 extend 方法在 deep 参数为 false 时所谓的“浅复制”。这种复制只进行一个层级的复制：即如果源对象中存在对象属性，那么复制的对象上也会引用相同的对象。这不符合深复制的要求，但又比简单的复制引用的复制程度有了加深。</p>
+<ul>
+<li><p>递归实现</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">deepCopy</span>(<span class="params">oldObj, newObj</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> newObj = newObj || &#123;&#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i <span class="keyword">in</span> oldObj) &#123;</span><br><span class="line">        <span class="keyword">if</span> (oldObj[i] <span class="keyword">instanceof</span> <span class="built_in">Object</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (oldObj[i].constructor === <span class="built_in">Array</span>) &#123;</span><br><span class="line">                newObj[i] = [];</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                newObj[i] = &#123;&#125;;</span><br><span class="line">            &#125;</span><br><span class="line">            deepCopy(oldObj[i], newObj[i]);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            newObj[i] = oldObj[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> newObj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> obj1 = &#123;</span><br><span class="line">    country: <span class="string">'China'</span>,</span><br><span class="line">    city: [<span class="string">'Beijing,Shanghai,Nanjing'</span>],</span><br><span class="line">    age: <span class="number">16</span>,</span><br><span class="line">    friends: &#123;</span><br><span class="line">        name: <span class="string">'dot'</span>,</span><br><span class="line">        sex: <span class="string">'female'</span>,</span><br><span class="line">        age: <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> obj2 = &#123;</span><br><span class="line">    name: <span class="string">'dolby'</span>,</span><br><span class="line">    fav: <span class="string">'food'</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> obj3 = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(deepCopy(obj1, obj2));</span><br><span class="line"><span class="comment">//&#123; name: 'dolby',</span></span><br><span class="line"><span class="comment">//   fav: 'food',</span></span><br><span class="line"><span class="comment">//   country: 'China',</span></span><br><span class="line"><span class="comment">//   city: [ 'Beijing,Shanghai,Nanjing' ],</span></span><br><span class="line"><span class="comment">//   age: 16,</span></span><br><span class="line"><span class="comment">//   friends: &#123; name: 'dot', sex: 'female', age: null &#125; &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(deepCopy(obj1, obj3));</span><br><span class="line"><span class="comment">//&#123; country: 'China',</span></span><br><span class="line"><span class="comment">//   city: [ 'Beijing,Shanghai,Nanjing' ],</span></span><br><span class="line"><span class="comment">//   age: 16,</span></span><br><span class="line"><span class="comment">//   friends: &#123; name: 'dot', sex: 'female', age: null &#125; &#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>JSON 对象的 parse()和 stringify()方法</p>
+<p>stringify()方法将 JS 对象序列化成 JSON 字符串，parse()方法将 JSON 字符串反序列化成 JS 对象，借助这两个方法可以实现对象的深复制。</p>
+</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> obj1 = &#123;</span><br><span class="line">    country: <span class="string">'China'</span>,</span><br><span class="line">    city: [<span class="string">'Beijing'</span>, <span class="string">'Shanghai'</span>, <span class="string">'Nanjing'</span>],</span><br><span class="line">    age: <span class="number">16</span>,</span><br><span class="line">    friends: &#123;</span><br><span class="line">        name: <span class="string">'dot'</span>,</span><br><span class="line">        sex: <span class="string">'female'</span>,</span><br><span class="line">        age: <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">var</span> deepCopyObj = <span class="built_in">JSON</span>.parse(<span class="built_in">JSON</span>.stringify(obj1));</span><br><span class="line"><span class="built_in">console</span>.log(deepCopyObj);</span><br><span class="line"><span class="comment">//&#123; country: 'China',</span></span><br><span class="line"><span class="comment">//   city: [ 'Beijing', 'Shanghai', 'Nanjing' ],</span></span><br><span class="line"><span class="comment">//   age: 16,</span></span><br><span class="line"><span class="comment">//   friends: &#123; name: 'dot', sex: 'female', age: null &#125; &#125;</span></span><br><span class="line"></span><br><span class="line">deepCopyObj.age = <span class="number">0</span>;</span><br><span class="line">deepCopyObj.city[<span class="number">1</span>] = <span class="string">'tianjin'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(deepCopyObj);</span><br><span class="line"><span class="comment">//&#123; country: 'China',</span></span><br><span class="line"><span class="comment">//   city: [ 'Beijing', 'tianjin', 'Nanjing' ],</span></span><br><span class="line"><span class="comment">//   age: 0,</span></span><br><span class="line"><span class="comment">//   friends: &#123; name: 'dot', sex: 'female', age: null &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(obj1);</span><br><span class="line"><span class="comment">//&#123; country: 'China',</span></span><br><span class="line"><span class="comment">//   city: [ 'Beijing', 'Shanghai', 'Nanjing' ],</span></span><br><span class="line"><span class="comment">//   age: 16,</span></span><br><span class="line"><span class="comment">//   friends: &#123; name: 'dot', sex: 'female', age: null &#125; &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>从代码输出看出，复制后的 deepCopyObj 与 obj1 完全隔离，二者不会相互影响。<br>这个方法可满足基本的深复制需求，而且能够处理 JSON 格式能表示的所有数据类型（即 Number, String, Boolean, Array, 扁平对象），但对于正则表达式类型、函数类型等无法进行深复制(而且会直接丢失相应的值)，同时如果对象中存在循环引用的情况也无法正确处理。</p>
+<ul>
+<li><p>jQuery 库中的 extend 复制方法</p>
+<p>在 jQuery 中可通过添加一个参数来实现递归 extend。调用$.extend(true, {}, …)就可以实现深复制。jQuery 无法正确深复制 JSON 对象以外的对象.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> x = &#123;</span><br><span class="line">    a: <span class="number">1</span>,</span><br><span class="line">    b: &#123; <span class="attr">f</span>: &#123; <span class="attr">g</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    c: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> y = $.extend(&#123;&#125;, x), <span class="comment">//浅复制</span></span><br><span class="line">    z = $.extend(<span class="literal">true</span>, &#123;&#125;, x); <span class="comment">//深复制</span></span><br><span class="line"></span><br><span class="line">y.b.f === x.b.f; <span class="comment">// true</span></span><br><span class="line">z.b.f === x.b.f; <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>lodash 库的<em>.clone() 或 .cloneDeep()方法——拥抱未来的库</em></p>
+<p><em>lodash 中关于复制的方法有两个，分别是.clone()和</em>.cloneDeep()。其中<em>.clone(obj, true)等价于</em>.cloneDeep(obj)。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> $ = <span class="built_in">require</span>(<span class="string">'jquery'</span>),</span><br><span class="line">    _ = <span class="built_in">require</span>(<span class="string">'lodash'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> arr = <span class="keyword">new</span> <span class="built_in">Int16Array</span>(<span class="number">5</span>),</span><br><span class="line">    obj = &#123; <span class="attr">a</span>: arr &#125;,</span><br><span class="line">    obj2;</span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">5</span>;</span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">6</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. jQuery</span></span><br><span class="line">obj2 = $.extend(<span class="literal">true</span>, &#123;&#125;, obj);</span><br><span class="line"><span class="built_in">console</span>.log(obj2.a); <span class="comment">// [5, 6, 0, 0, 0]</span></span><br><span class="line"><span class="built_in">Object</span>.prototype.toString.call(obj2); <span class="comment">// [object Int16Array]</span></span><br><span class="line">obj2.a[<span class="number">0</span>] = <span class="number">100</span>;</span><br><span class="line"><span class="built_in">console</span>.log(obj); <span class="comment">// [100, 6, 0, 0, 0]</span></span><br><span class="line"><span class="comment">//此处jQuery不能正确处理Int16Array的深复制！！！</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. lodash</span></span><br><span class="line">obj2 = _.cloneDeep(obj);</span><br><span class="line"><span class="built_in">console</span>.log(obj2.a); <span class="comment">// [5, 6, 0, 0, 0]</span></span><br><span class="line"><span class="built_in">Object</span>.prototype.toString.call(arr2); <span class="comment">// [object Int16Array]</span></span><br><span class="line">obj2.a[<span class="number">0</span>] = <span class="number">100</span>;</span><br><span class="line"><span class="built_in">console</span>.log(obj);</span><br></pre></td></tr></table></figure>
+
+<p>注意：如果对象比较大，层级比较多，深复制会带来性能上的问题，在遇到需要采用深复制的场景时可以考虑看看有没有其他替代的方案，在实际应用场景中也是浅复制更为常用。</p>
+<blockquote>
+<p><strong>参考资料</strong>：</p>
+<ul>
+<li><a href="http://jerryzou.com/posts/dive-into-deep-clone-in-javascript/" target="_blank" rel="noopener"><em>深入剖析 JavaScript 的深复制</em></a></li>
+<li><a href="http://www.cnblogs.com/tracylin/p/5346314.html" target="_blank" rel="noopener"><em>js 浅复制和深复制</em></a></li>
+</ul>
+</blockquote>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+      
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/05/前端开发工程师必会的5种网页布局方式/" rel="prev" title="前端开发工程师必会的5种网页布局方式">
+                前端开发工程师必会的5种网页布局方式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  
+    <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Wandly">
+  
+  <p class="site-author-name" itemprop="name">Wandly</p>
+  <div class="site-description motion-element" itemprop="description">只要熟悉菜谱，任何人都可能做出美味佳肴，我是一名前端攻城师，也是一名厨子</div>
+</div>
+
+
+  <nav class="site-state motion-element">
+    
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+        
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+        
+      </div>
+    
+
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span>
+        
+      </div>
+    
+  </nav>
+
+
+
+
+
+
+
+  <div class="links-of-author motion-element">
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:277621531@qq.com" title="E-Mail &rarr; mailto:277621531@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+
+
+
+
+          
+          
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#浅复制："><span class="nav-number">1.</span> <span class="nav-text">浅复制：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#深复制："><span class="nav-number">2.</span> <span class="nav-text">深复制：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wandly</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v7.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+  <script src="/js/motion.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.2.0"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.2.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+  
+
+  
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// GET RESPONSIVE HEIGHT PASSED FROM IFRAME
+
+window.addEventListener("message", function(e) {
+  var data = e.data;
+  if ((typeof data === 'string') && (data.indexOf('ciu_embed') > -1)) {
+    var featureID = data.split(':')[1];
+    var height = data.split(':')[2];
+    $(`iframe[data-feature=${featureID}]`).height(parseInt(height) + 30);
+  }
+}, false);
+</script>
+
+
+
+
+
+
+
+
+  
+
+</body>
+</html>
